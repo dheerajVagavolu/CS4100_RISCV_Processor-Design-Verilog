@@ -4,7 +4,8 @@
 module alu_control(
     input      [31:0] instruction,
     input      [1:0]  ALUOp,
-    output reg [3:0]  ALUFn
+    output reg [3:0]  ALUFn,
+	output reg [1:0] BranchOp
 );
 
 always @(instruction or ALUOp)
@@ -37,6 +38,15 @@ begin
 		end
     end else if (ALUOp == 2'b01) begin // SB Type
        	ALUFn <= 4'b0110; // SUB
+		if (instruction[14:12] == 3'b000) begin //BEQ
+			BranchOp <= 2'b00;
+		end else if (instruction[14:12] == 3'b000) begin // BNE
+			BranchOp <= 2'b01;
+		end else if (instruction[14:12] == 3'b000) begin // BLT
+			BranchOp <= 2'b10;
+		end else if (instruction[14:12] == 3'b000) begin // BGE
+			BranchOp <= 2'b11;
+		end
    end
 
 end

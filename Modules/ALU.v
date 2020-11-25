@@ -59,6 +59,22 @@ module ALU(clk, x, y, out, ALUFn, zero, ng, overflow);
 			zero = (out==0)?1:0;
 			ng = (out<0)?1:0;
 			overflow = 0;
+		end else if (ALUFn[3:0] == 4'b0101) begin // Mul
+			out = x * y;
+			zero = (out==0)?1:0;
+			ng = (out<0)?1:0;
+			overflow = 0;
+		end else if (ALUFn[3:0] == 4'b0111) begin // Div
+			out = x / y;
+			
+			zero = (out==0)?1:0;
+			ng = (out<0)?1:0;
+			overflow = 0;
+		end else if (ALUFn[3:0] == 4'b1001) begin // Rem
+			out = x % y;
+			zero = (out==0)?1:0;
+			ng = (out<0)?1:0;
+			overflow = 0;
 		end
 	end
 endmodule

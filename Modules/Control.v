@@ -46,7 +46,7 @@ always @(instruction)
         Branch   = controlSignals[opcode][4];
         ALUOp    = controlSignals[opcode][3:2];
         Jump     = controlSignals[opcode][1];
-	JumpR     = controlSignals[opcode][0];
+	JumpR    = controlSignals[opcode][0];
 
     end
 endmodule

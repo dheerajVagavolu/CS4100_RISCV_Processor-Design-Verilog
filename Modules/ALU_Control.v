@@ -19,7 +19,7 @@ begin
 	end
     end else if (ALUOp == 2'b10) begin // R Type
 	if (instruction[31:24] == 7'b0000000) begin
-		end else if (instruction[14:12] == 3'b000) begin // ADD
+		if (instruction[14:12] == 3'b000) begin // ADD
 			ALUFn <= 4'b0010; // ADD
 		end else if (instruction[14:12] == 3'b111) begin // AND
 			ALUFn <= 4'b0000;
@@ -31,7 +31,16 @@ begin
 			ALUFn <= 4'b0100; // SLL
 		end else if (instruction[14:12] == 3'b101) begin // SRL
 			ALUFn <= 4'b1000; // SRL
+		end 
+	end else if (instruction[31:24] == 7'b0000001) begin
+		if (instruction[14:12] == 3'b000) begin // Mul
+			ALUFn <= 4'b0101; // 
+		end else if (instruction[14:12] == 3'b100) begin // Div
+			ALUFn <= 4'b0111; // SLL
+		end else if (instruction[14:12] == 3'b110) begin // Rem
+			ALUFn <= 4'b1001; // SRL
 		end
+	end 
     end else if (instruction[31:24] == 7'b0100000) begin
 		if (instruction[14:12] == 3'b000) begin // SUB
 			ALUFn <= 4'b0110; // SUB

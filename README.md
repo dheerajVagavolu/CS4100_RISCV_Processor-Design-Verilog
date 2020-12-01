@@ -2,5 +2,4 @@
 CS4100 RISC-V Single cycle processor in Verilog
 
 
-#### Authors: 
-Aparna and Dheeraj
+

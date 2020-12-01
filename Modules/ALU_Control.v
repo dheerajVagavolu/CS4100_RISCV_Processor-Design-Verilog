@@ -1,63 +1,34 @@
-
 `timescale 1ns / 1ps
 
-module alu_control(
-    input      [31:0] instruction,
-    input      [1:0]  ALUOp,
-    output reg [3:0]  ALUFn,
-	output reg [1:0] BranchOp
+module ALUController(
+    
+    //Inputs
+    input [1:0] ALUOp,  //7-bit opcode field from the instruction
+    input [6:0] Funct7, // bits 25 to 31 of the instruction
+    input [2:0] Funct3, // bits 12 to 14 of the instruction
+    input Branch,
+    input Mem,OpI,AUIPC,
+    //Output
+    output [3:0] ALUFn, //ALUFn selection for ALU
+    output Con_beq, Con_bnq,  Con_blt, Con_bgt
 );
 
-always @(instruction or ALUOp)
-begin
-    if (ALUOp == 2'b00) begin //Load Word, Store Word, I type (ADD)
-        // ALUFn <= instruction[5:0];
-	if (instruction[6:5] == 2'b00) begin // Load word
-		ALUFn <= 5'b0010; //ADD
-	end else if (instruction[6:5] == 2'b01) begin // Store word
-		ALUFn <= 5'b0010; // ADD
-	end
-    end else if (ALUOp == 2'b10) begin // R Type
-	if (instruction[31:24] == 7'b0000000) begin
-		if (instruction[14:12] == 3'b000) begin // ADD
-			ALUFn <= 4'b0010; // ADD
-		end else if (instruction[14:12] == 3'b111) begin // AND
-			ALUFn <= 4'b0000;
-		end else if (instruction[14:12] == 3'b110) begin // OR
-			ALUFn <= 4'b0001; // OR
-		end else if (instruction[14:12] == 3'b100) begin // XOR
-			ALUFn <= 4'b0011; // XOR
-		end else if (instruction[14:12] == 3'b001) begin // SLL
-			ALUFn <= 4'b0100; // SLL
-		end else if (instruction[14:12] == 3'b101) begin // SRL
-			ALUFn <= 4'b1000; // SRL
-		end 
-	end else if (instruction[31:24] == 7'b0000001) begin
-		if (instruction[14:12] == 3'b000) begin // Mul
-			ALUFn <= 4'b0101; // 
-		end else if (instruction[14:12] == 3'b100) begin // Div
-			ALUFn <= 4'b0111; // SLL
-		end else if (instruction[14:12] == 3'b110) begin // Rem
-			ALUFn <= 4'b1001; // SRL
-		end
-	end 
-    end else if (instruction[31:24] == 7'b0100000) begin
-		if (instruction[14:12] == 3'b000) begin // SUB
-			ALUFn <= 4'b0110; // SUB
-		end
-    end else if (ALUOp == 2'b01) begin // SB Type
-       	ALUFn <= 4'b0110; // SUB
-		if (instruction[14:12] == 3'b000) begin //BEQ
-			BranchOp <= 2'b00;
-		end else if (instruction[14:12] == 3'b000) begin // BNE
-			BranchOp <= 2'b01;
-		end else if (instruction[14:12] == 3'b000) begin // BLT
-			BranchOp <= 2'b10;
-		end else if (instruction[14:12] == 3'b000) begin // BGE
-			BranchOp <= 2'b11;
-		end
-   end
+ assign Con_beq = (Branch)&&(Funct3==3'b000);
+ assign Con_bnq = (Branch)&&(Funct3==3'b001);
+ assign Con_blt = (Branch)&&(Funct3==3'b100||Funct3==3'b110);
+ assign Con_bgt = (Branch)&&(Funct3==3'b101||Funct3==3'b111);
 
-end
+ assign ALUFn[0] = ((Funct7 == 7'b0000001)&&((Funct3 == 3'b000)||(Funct3 == 3'b100)||(Funct3 == 3'b110)))||((ALUOp[1]==1'b1) && (Funct7==7'b0000000) && ((Funct3==3'b110)||(Funct3==3'b100)||(Funct3==3'b011)))||(Branch&&(Funct3==3'b110||Funct3==3'b111))||(OpI&&(Funct3==3'b100))||(OpI&&(Funct3==3'b110))||(OpI&&Funct3==3'b011);
+
+
+ assign ALUFn[1] = ((Funct7 == 7'b0000001)&&(Funct3 == 3'b100))||(ALUOp==2'b00&&(!OpI)) ||
+                     ((ALUOp[1]==1'b1) && (Funct7==7'b0000000) && ((Funct3==3'b000)||(Funct3==3'b100)||(Funct3==3'b010)))||
+                     ((ALUOp[1]==1'b1) && (Funct7==7'b0100000) && (Funct3==3'b000))||(ALUOp[0]==1'b1)||Mem||(OpI&&(Funct3==3'b100))||(OpI&&(Funct3==3'b000))||(OpI&&Funct3==3'b010); 
+
+
+
+ assign ALUFn[2] = ((Funct7 == 7'b0000001)&&(Funct3 == 3'b110))||(ALUOp[0]==1'b1)||((ALUOp[1]==1'b1) && (Funct7==7'b0100000) && (Funct3==3'b000))||((ALUOp[1]==1'b1) && (Funct7==7'b0000000) && ((Funct3==3'b001)||(Funct3==3'b011))) ||(OpI&&Funct7 == 7'b0100000&&Funct3 == 3'b101) || (ALUOp[1]&&Funct7 == 7'b0100000&&Funct3 == 3'b101)||(OpI&&Funct3 == 3'b001)||(OpI&&Funct3==3'b011);
+
+ assign ALUFn[3] = ((Funct7 == 7'b0000001)&&((Funct3 == 3'b000)||(Funct3 == 3'b100)||(Funct3 == 3'b110)))||(Funct3 == 3'b010&&(!Mem))||(OpI&&Funct3 == 3'b101&&Funct7 == 7'b0000000)||(ALUOp[1]&&(Funct3 == 3'b101))||(OpI&&Funct7 == 7'b0100000&&Funct3 == 3'b101)||(ALUOp[1]&&Funct7 == 7'b0100000&&Funct3 == 3'b101);
 
 endmodule

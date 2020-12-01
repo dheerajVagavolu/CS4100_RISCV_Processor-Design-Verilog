@@ -5,23 +5,16 @@ module instructionmemory#(
     parameter INS_W = 32
      )(
     input [ INS_ADDRESS -1:0] ra , // Read address of the instruction memory , comes from PC
-    output [ INS_W -1:0] rd // Read Data
+    output reg [ INS_W -1:0] rd // Read Data
     );
     
 
-    reg [INS_W-1 :0] Inst_mem [(2**(INS_ADDRESS-2))-1:0];
-    initial begin
-        $display("Loading rom.");
-        $readmemh("rom_image.mem", test_memory);
-    end
+reg [INS_W-1 :0] Inst_mem [(2**(INS_ADDRESS-2))-1:0];
 
-
-
-assign rd =  Inst_mem [ra[INS_ADDRESS-1:2]];  
-
-endmodule
-
-
+initial 
+begin
+$readmemb("instructions.txt", Inst_mem);
+end
 // assign Inst_mem[0]   = 32'h00007033;//      and  r0,r0,r0           ALUResult = h0 = r0          
 // assign Inst_mem[1]   = 32'h00100093;//      addi r1,r0, 1           ALUResult = h1 = r1
 // assign Inst_mem[2]   = 32'h00200113;//      addi r2,r0, 2           ALUResult = h2 = r2
@@ -102,3 +95,10 @@ endmodule
 
 // assign Inst_mem[55]  = 32'h02d01423; //    sh r13 ->40(r0)            ALUResult = h28  
 // assign Inst_mem[56]  = 32'h02802703;//     lw 40(r0) -> r13           ALUResult = 000002f0  = r13
+
+
+always@(ra) 
+begin
+rd =  Inst_mem [ra[INS_ADDRESS-1:2]];  
+end
+endmodule

@@ -11,7 +11,7 @@ module instructionmemory#(
 
 wire [INS_W-1 :0] Inst_mem [(2**(INS_ADDRESS-2))-1:0];
     
-$readmemh("instructions.txt", Inst_mem);
+$readmemh("instructions.o", Inst_mem);
 
 // assign Inst_mem[0]   = 32'h00007033;//      and  r0,r0,r0           ALUResult = h0 = r0          
 // assign Inst_mem[1]   = 32'h00100093;//      addi r1,r0, 1           ALUResult = h1 = r1
